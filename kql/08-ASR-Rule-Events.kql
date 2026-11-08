@@ -1,0 +1,14 @@
+// Attack surface reduction rule events - audited and blocked, across all rules
+// Author: Seán O'Farrell | https://cloud-secure.ai/
+// Series: Simulating Defender for Endpoint machine isolation and remediation
+// Use this to see which ASR rules are firing (including the LSASS credential-theft rule)
+let DeviceNameFilter = "";
+let Lookback = 7d;
+DeviceEvents
+| where Timestamp > ago(Lookback)
+| where isempty(DeviceNameFilter) or DeviceName has DeviceNameFilter
+| where ActionType startswith "Asr"
+| summarize Count = count(), LastSeen = max(Timestamp),
+    Files = make_set_if(FileName, isnotempty(FileName), 10)
+    by ActionType, DeviceName, InitiatingProcessFileName
+| order by LastSeen desc

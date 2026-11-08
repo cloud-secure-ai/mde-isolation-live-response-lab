@@ -1,0 +1,12 @@
+// Controlled Folder Access violations (ransomware-style writes blocked or audited)
+// Author: Seán O'Farrell | https://cloud-secure.ai/
+// Series: Simulating Defender for Endpoint machine isolation and remediation
+let DeviceNameFilter = "";
+let Lookback = 1d;
+DeviceEvents
+| where Timestamp > ago(Lookback)
+| where isempty(DeviceNameFilter) or DeviceName has DeviceNameFilter
+| where ActionType startswith "ControlledFolderAccess"
+| project Timestamp, DeviceName, ActionType, FolderPath, FileName,
+    InitiatingProcessFileName, InitiatingProcessCommandLine, InitiatingProcessAccountName
+| order by Timestamp desc
