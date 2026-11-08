@@ -54,6 +54,8 @@ Run these in Advanced hunting. Each query has a `DeviceNameFilter` variable at t
 | [`04-RDP-Lockout-Changes.kql`](kql/04-RDP-Lockout-Changes.kql) | fDenyTSConnections, firewall rule and firewall profile changes |
 | [`05-RDP-Connections-And-Blocks.kql`](kql/05-RDP-Connections-And-Blocks.kql) | RDP connections accepted, blocked and logged on |
 | [`06-Live-Response-Activity.kql`](kql/06-Live-Response-Activity.kql) | Processes started by the Defender response components (Live Response scripts) |
+| [`07-Controlled-Folder-Access.kql`](kql/07-Controlled-Folder-Access.kql) | Controlled Folder Access violations (ransomware-style writes blocked or audited) |
+| [`08-ASR-Rule-Events.kql`](kql/08-ASR-Rule-Events.kql) | Attack surface reduction rule events, audited and blocked, across all rules |
 
 ## Author
 
