@@ -1,0 +1,30 @@
+// RDP connection attempts to the lab device - accepted, blocked and logons
+// Author: Seán O'Farrell | https://cloud-secure.ai/
+// Series: Simulating Defender for Endpoint machine isolation and remediation
+// FirewallInboundConnectionBlocked needs Windows Firewall auditing enabled on the device.
+let DeviceNameFilter = "";
+let Lookback = 1d;
+let RdpPort = 3389;
+union
+(
+    DeviceNetworkEvents
+    | where Timestamp > ago(Lookback)
+    | where isempty(DeviceNameFilter) or DeviceName has DeviceNameFilter
+    | where LocalPort == RdpPort and ActionType in ("InboundConnectionAccepted", "ListeningConnectionCreated")
+    | project Timestamp, DeviceName, ActionType, RemoteIP, RemotePort, LocalPort, Account = ""
+),
+(
+    DeviceEvents
+    | where Timestamp > ago(Lookback)
+    | where isempty(DeviceNameFilter) or DeviceName has DeviceNameFilter
+    | where ActionType == "FirewallInboundConnectionBlocked" and LocalPort == RdpPort
+    | project Timestamp, DeviceName, ActionType, RemoteIP, RemotePort, LocalPort, Account = ""
+),
+(
+    DeviceLogonEvents
+    | where Timestamp > ago(Lookback)
+    | where isempty(DeviceNameFilter) or DeviceName has DeviceNameFilter
+    | where LogonType == "RemoteInteractive"
+    | project Timestamp, DeviceName, ActionType, RemoteIP, RemotePort = int(null), LocalPort = int(null), Account = AccountName
+)
+| order by Timestamp desc

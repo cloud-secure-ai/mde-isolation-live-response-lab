@@ -1,0 +1,26 @@
+// Changes that lock a device out of RDP: fDenyTSConnections, firewall rules and profiles
+// Author: Seán O'Farrell | https://cloud-secure.ai/
+// Series: Simulating Defender for Endpoint machine isolation and remediation
+let DeviceNameFilter = "";
+let Lookback = 7d;
+union
+(
+    DeviceRegistryEvents
+    | where Timestamp > ago(Lookback)
+    | where isempty(DeviceNameFilter) or DeviceName has DeviceNameFilter
+    | where RegistryValueName == "fDenyTSConnections"
+        or RegistryKey has @"\Services\SharedAccess\Parameters\FirewallPolicy\FirewallRules"
+    | project Timestamp, DeviceName, Source = "Registry", ActionType, Detail = strcat(RegistryKey, "\\", RegistryValueName),
+        Value = RegistryValueData, InitiatingProcessFileName, InitiatingProcessCommandLine, InitiatingProcessAccountName
+),
+(
+    DeviceProcessEvents
+    | where Timestamp > ago(Lookback)
+    | where isempty(DeviceNameFilter) or DeviceName has DeviceNameFilter
+    | where (FileName =~ "netsh.exe" and ProcessCommandLine has "advfirewall")
+        or ProcessCommandLine has_any ("New-NetFirewallRule", "Set-NetFirewallProfile", "Set-NetFirewallRule",
+                                       "Disable-NetFirewallRule", "fDenyTSConnections")
+    | project Timestamp, DeviceName, Source = "Process", ActionType, Detail = FileName,
+        Value = ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine, InitiatingProcessAccountName = AccountName
+)
+| order by Timestamp desc

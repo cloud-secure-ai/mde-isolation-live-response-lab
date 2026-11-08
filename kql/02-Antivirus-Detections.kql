@@ -1,0 +1,14 @@
+// Microsoft Defender Antivirus detections on the lab device
+// Author: Seán O'Farrell | https://cloud-secure.ai/
+// Series: Simulating Defender for Endpoint machine isolation and remediation
+let DeviceNameFilter = "";
+let Lookback = 7d;
+DeviceEvents
+| where Timestamp > ago(Lookback)
+| where isempty(DeviceNameFilter) or DeviceName has DeviceNameFilter
+| where ActionType == "AntivirusDetection"
+| extend Fields = parse_json(AdditionalFields)
+| project Timestamp, DeviceName, ThreatName = tostring(Fields.ThreatName),
+    WasRemediated = tostring(Fields.WasRemediated), FileName, FolderPath, SHA256,
+    InitiatingProcessFileName, InitiatingProcessAccountName
+| order by Timestamp desc

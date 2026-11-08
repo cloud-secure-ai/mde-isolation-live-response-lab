@@ -1,0 +1,13 @@
+// Processes started by the Defender for Endpoint response components (Live Response scripts, remediation)
+// Author: Seán O'Farrell | https://cloud-secure.ai/
+// Series: Simulating Defender for Endpoint machine isolation and remediation
+// Live Response 'run' commands execute PowerShell under the SENSE response process.
+let DeviceNameFilter = "";
+let Lookback = 7d;
+DeviceProcessEvents
+| where Timestamp > ago(Lookback)
+| where isempty(DeviceNameFilter) or DeviceName has DeviceNameFilter
+| where InitiatingProcessFileName in~ ("SenseIR.exe", "MsSense.exe")
+| project Timestamp, DeviceName, FileName, ProcessCommandLine, AccountName,
+    InitiatingProcessFileName, InitiatingProcessCommandLine
+| order by Timestamp desc

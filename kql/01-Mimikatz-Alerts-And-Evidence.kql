@@ -1,0 +1,22 @@
+// Mimikatz simulation - alerts and evidence for the lab device
+// Author: Seán O'Farrell | https://cloud-secure.ai/
+// Series: Simulating Defender for Endpoint machine isolation and remediation
+// Set DeviceNameFilter to your test device. Use "" to search all devices.
+let DeviceNameFilter = "";
+let Lookback = 7d;
+AlertEvidence
+| where Timestamp > ago(Lookback)
+| where isempty(DeviceNameFilter) or DeviceName has DeviceNameFilter
+| join kind=inner (
+    AlertInfo
+    | where Timestamp > ago(Lookback)
+    | project AlertId, Title, Severity, Category, DetectionSource, AttackTechniques
+  ) on AlertId
+| summarize
+    FirstSeen = min(Timestamp),
+    LastSeen = max(Timestamp),
+    Files = make_set_if(FileName, isnotempty(FileName)),
+    Processes = make_set_if(ProcessCommandLine, isnotempty(ProcessCommandLine)),
+    Accounts = make_set_if(AccountName, isnotempty(AccountName))
+    by AlertId, Title, Severity, Category, DetectionSource, AttackTechniques, DeviceName
+| order by FirstSeen desc
