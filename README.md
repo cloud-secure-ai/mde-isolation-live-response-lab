@@ -29,6 +29,7 @@ Upload these to the Live Response library (Settings > Endpoints > Library manage
 | [`Restore-RdpAccess.ps1`](scripts/Restore-RdpAccess.ps1) | Restores RDP: fDenyTSConnections, TermService, firewall rules. Supports `-WhatIf` | Yes |
 | [`Get-DefenderDetectionSummary.ps1`](scripts/Get-DefenderDetectionSummary.ps1) | Defender status (incl. tamper protection) and recent detections | No |
 | [`Invoke-RdpLockoutSimulation.ps1`](scripts/Invoke-RdpLockoutSimulation.ps1) | **Lab only.** Locks the device out of RDP. Run locally, not through Live Response | Yes |
+| [`Invoke-DetectionTest.ps1`](scripts/Invoke-DetectionTest.ps1) | **Lab only.** Generates benign detections (EICAR test file and Microsoft's documented endpoint detection test) to raise a Defender alert and incident. Run locally | Yes (writes test files) |
 
 Examples in a Live Response session:
 
